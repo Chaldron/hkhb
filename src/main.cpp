@@ -7,6 +7,7 @@
 #include "control.h"
 #include "wifi.h"
 
+// HomeKit server config
 extern "C" homekit_server_config_t config;
 
 // HomeKit broadcast timer
@@ -28,13 +29,11 @@ void setup() {
   // Run HomeKit setup
   arduino_homekit_setup(&config);
 
-  // Setup GPIO pins
-
-  // HomeKit identification LED
+  // Setup HomeKit identification LED
   pinMode(PIN_LED, OUTPUT);
   led_off();
 
-  // Turn on and off all fan settings, ending with off
+  // Setup fan pins + turn on and off all fan settings, ending with off
   pinMode(PIN_LOW, OUTPUT);
   pinMode(PIN_MEDIUM, OUTPUT);
   pinMode(PIN_HIGH, OUTPUT);
@@ -47,12 +46,11 @@ void setup() {
 
 void loop() {
   arduino_homekit_loop();
-  const uint32_t t = millis();
 
-  // Keep-alive
+  // Keep-alive with mDNS, otherwise HomeKit says we aren't responding
+  const uint32_t t = millis();
   if (t > next_broadcast_timer) {
     next_broadcast_timer = t + 1500;
-    // notify();
     MDNS.announce();
   }
 

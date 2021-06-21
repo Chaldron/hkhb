@@ -1,3 +1,5 @@
+#include "fan.h"
+
 #include <homekit/characteristics.h>
 #include <homekit/homekit.h>
 
@@ -12,6 +14,7 @@ homekit_characteristic_t ch_speed = HOMEKIT_CHARACTERISTIC_(
     ROTATION_SPEED, 1, .min_value = (float[]){0}, .max_value = (float[]){3},
     .getter = speed_get, .setter = speed_set);
 
+// HomeKit fan definition
 homekit_accessory_t *accessories[] = {
     HOMEKIT_ACCESSORY(
             .id = 1, .category = homekit_accessory_category_fan,
@@ -21,23 +24,25 @@ homekit_accessory_t *accessories[] = {
                         ACCESSORY_INFORMATION,
                         .characteristics =
                             (homekit_characteristic_t *[]){
-                                HOMEKIT_CHARACTERISTIC(NAME, "Fan"),
+                                HOMEKIT_CHARACTERISTIC(NAME, FAN_NAME),
                                 HOMEKIT_CHARACTERISTIC(MANUFACTURER,
-                                                       "Harbor Breeze"),
-                                HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "1289"),
-                                HOMEKIT_CHARACTERISTIC(MODEL, "CHQ7030T"),
+                                                       FAN_MANUFACTURER),
+                                HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER,
+                                                       FAN_SERIAL_NUMBER),
+                                HOMEKIT_CHARACTERISTIC(MODEL, FAN_MODEL),
                                 HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION,
-                                                       "1.0"),
+                                                       FAN_FIRMWARE_REVISION),
                                 HOMEKIT_CHARACTERISTIC(IDENTIFY, identify),
                                 NULL}),
                     HOMEKIT_SERVICE(FAN2, .primary = true,
                                     .characteristics =
                                         (homekit_characteristic_t *[]){
-                                            HOMEKIT_CHARACTERISTIC(NAME, "Fan"),
+                                            HOMEKIT_CHARACTERISTIC(NAME,
+                                                                   FAN_NAME),
                                             &ch_active, &ch_speed, NULL}),
 
                     NULL}),
     NULL};
 
 homekit_server_config_t config = {.accessories = accessories,
-                                  .password = "111-11-111"};
+                                  .password = FAN_PASSWORD};

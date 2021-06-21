@@ -2,12 +2,15 @@
 #include <homekit/homekit.h>
 
 // Identify accessory
-void identify(homekit_value_t _value);
+void identify(homekit_value_t);
 
-// HomeKit notify - necessary due to control timeouts?
+// HomeKit notify - called every so often, not sure if this is strictly
+// necessary
 #ifdef __cplusplus
 extern "C" {
+#endif
 extern void notify();
+#ifdef __cplusplus
 }
 #endif
 

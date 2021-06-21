@@ -2,16 +2,21 @@
 
 #include "control.h"
 
+// HomeKit characteristics we're handling the callbacks for
 extern homekit_characteristic_t ch_active;
 extern homekit_characteristic_t ch_speed;
 
-void identify(homekit_value_t _value) { blink_led(1000); }
+// Ideally we'd maybe flash the lights here or something,
+// but for our use case we can just blink the LED on the baord
+void identify(homekit_value_t value) { blink_led(1000); }
 
+// Notify to all devices the current status of our device
 void notify() {
   homekit_characteristic_notify(&ch_active, ch_active.value);
   homekit_characteristic_notify(&ch_speed, ch_speed.value);
 }
 
+// Get/set active status
 homekit_value_t active_get() { return ch_active.value; }
 void active_set(homekit_value_t value) {
   // early exit
@@ -24,34 +29,23 @@ void active_set(homekit_value_t value) {
   if (!value.bool_value) rc_off();
 
   // notify and blink
-  homekit_characteristic_notify(&ch_active, ch_active.value);
+  notify();
   blink_led(100);
 }
 
+// Get/set speed
 homekit_value_t speed_get() { return ch_speed.value; }
 void speed_set(homekit_value_t value) {
   // update value
   ch_speed.value = value;
 
   // turn fan off, or to low/medium/high
-  switch ((uint8_t)value.float_value) {
-    case 0:
-      rc_off();
-      break;
-    case 1:
-      rc_low();
-      break;
-    case 2:
-      rc_medium();
-      break;
-    case 3:
-      rc_high();
-      break;
-    default:
-      break;
-  }
+  // "fun" with function pointers
+  static const void (*rc_map[4])() = {rc_off, rc_low, rc_medium, rc_high};
+  uint8_t target_speed = (uint8_t)value.float_value;
+  if (target_speed >= 0 && target_speed <= 3) rc_map[target_speed]();
 
   // notify and blink
-  homekit_characteristic_notify(&ch_speed, ch_speed.value);
+  notify();
   blink_led(100);
 }
