@@ -35,10 +35,10 @@ void setup() {
   led_off();
 
   // Turn on and off all fan settings, ending with off
-  pinMode(PIN_OFF, OUTPUT);
   pinMode(PIN_LOW, OUTPUT);
   pinMode(PIN_MEDIUM, OUTPUT);
   pinMode(PIN_HIGH, OUTPUT);
+  pinMode(PIN_OFF, OUTPUT);
   rc_high();
   rc_medium();
   rc_low();
