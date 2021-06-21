@@ -4,6 +4,13 @@
 // Identify accessory
 void identify(homekit_value_t _value);
 
+// HomeKit notify - necessary due to control timeouts?
+#ifdef __cplusplus
+extern "C" {
+extern void notify();
+}
+#endif
+
 // Get/set active status
 homekit_value_t active_get();
 void active_set(homekit_value_t value);

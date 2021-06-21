@@ -1,46 +1,16 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #include <arduino_homekit_server.h>
 
+#include "callback.h"
+#include "control.h"
 #include "wifi.h"
 
-#define LOG_D(fmt, ...) printf_P(PSTR(fmt "\n"), ##__VA_ARGS__);
-
-//==============================
-// Homekit setup and loop
-//==============================
-
-// access your homekit characteristics defined in my_accessory.c
 extern "C" homekit_server_config_t config;
-extern "C" homekit_characteristic_t active;
 
-static uint32_t next_heap_millis = 0;
-static uint32_t next_report_millis = 0;
-
-void my_homekit_setup() { arduino_homekit_setup(&config); }
-
-void my_homekit_report() {
-  active.value.bool_value = true;
-  homekit_characteristic_notify(&active, active.value);
-  // homekit_characteristic_notify(&cha_current_temperature,
-  //                              cha_current_temperature.value);
-}
-
-void my_homekit_loop() {
-  arduino_homekit_loop();
-  const uint32_t t = millis();
-  if (t > next_report_millis) {
-    // report sensor values every 10 seconds
-    next_report_millis = t + 10 * 1000;
-    my_homekit_report();
-  }
-  if (t > next_heap_millis) {
-    // show heap info every 5 seconds
-    next_heap_millis = t + 5 * 1000;
-    LOG_D("Free heap: %d, HomeKit clients: %d", ESP.getFreeHeap(),
-          arduino_homekit_connected_clients_count());
-  }
-}
+// HomeKit broadcast timer
+static uint32_t next_broadcast_timer = 0;
 
 void setup() {
   // Start serial logging
@@ -55,10 +25,36 @@ void setup() {
     delay(100);
   }
 
-  my_homekit_setup();
+  // Run HomeKit setup
+  arduino_homekit_setup(&config);
+
+  // Setup GPIO pins
+
+  // HomeKit identification LED
+  pinMode(PIN_LED, OUTPUT);
+  led_off();
+
+  // Turn on and off all fan settings, ending with off
+  pinMode(PIN_OFF, OUTPUT);
+  pinMode(PIN_LOW, OUTPUT);
+  pinMode(PIN_MEDIUM, OUTPUT);
+  pinMode(PIN_HIGH, OUTPUT);
+  rc_high();
+  rc_medium();
+  rc_low();
+  rc_off();
 }
 
 void loop() {
-  my_homekit_loop();
+  arduino_homekit_loop();
+  const uint32_t t = millis();
+
+  // Keep-alive
+  if (t > next_broadcast_timer) {
+    next_broadcast_timer = t + 1500;
+    // notify();
+    MDNS.announce();
+  }
+
   delay(10);
 }
