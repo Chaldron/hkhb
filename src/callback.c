@@ -26,7 +26,17 @@ void active_set(homekit_value_t value) {
   ch_active.value = value;
 
   // turn off if we're going inactive
-  if (!value.bool_value) rc_off();
+  if (!value.bool_value) {
+    speed_set(HOMEKIT_FLOAT(0));
+  }
+  // set speed to lowest if the stored speed was 0
+  else if (!((uint8_t)ch_speed.value.int_value)) {
+    speed_set(HOMEKIT_FLOAT(1));
+  }
+  // otherwise just set the speed to the last remembered value
+  else {
+    speed_set(ch_speed.value);
+  }
 
   // notify and blink
   notify();

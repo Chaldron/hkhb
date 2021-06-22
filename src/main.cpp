@@ -50,7 +50,7 @@ void loop() {
   // Keep-alive with mDNS, otherwise HomeKit says we aren't responding
   const uint32_t t = millis();
   if (t > next_broadcast_timer) {
-    next_broadcast_timer = t + 1500;
+    next_broadcast_timer = t + 1000;
     MDNS.announce();
   }
 
