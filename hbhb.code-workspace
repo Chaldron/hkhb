@@ -17,7 +17,8 @@
             "type_traits": "c",
             "utility": "c",
             "callback.h": "c",
-            "control.h": "c"
+            "control.h": "c",
+            "string_view": "cpp"
         }
     }
 }
