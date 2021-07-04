@@ -7,9 +7,14 @@
 #include "control.h"
 #include "wifi.h"
 
+// Web server and REST client
 WiFiServer server(80);
 aREST rest = aREST();
 
+// Timer for mDNS broadcast
+unsigned long mDNS_timer = millis();
+
+// Current status of the fan
 extern bool active;
 extern uint8_t speed;
 
@@ -18,7 +23,7 @@ void setup() {
   Serial.begin(115200);
   Log.begin(LOG_LEVEL_INFO, &Serial);
 
-  Log.info("HomeBreeze HomeBridge firmware initializing" CR);
+  Log.info("Initializing HomeBreeze HomeBridge firmware" CR);
 
   // Initialize control
   Log.info("Initializing fan control" CR);
@@ -50,7 +55,7 @@ void setup() {
   rest.variable("speed", &speed);
   rest.function("identify", identify);
   rest.function("set_active", set_active);
-  rest.function("set_rotation_speed", set_rotation_speed);
+  rest.function("set_speed", set_speed);
 
   // Start the server
   Log.info("Starting the web server" CR);
@@ -58,13 +63,20 @@ void setup() {
 }
 
 void loop() {
-  WiFiClient client = server.available();
-  if (!client) {
+  // Broadcast mDNS if needed
+  unsigned long time = millis();
+  if (time - mDNS_timer > 1500) {
+    Log.trace("Broadcasting mDNS" CR);
     MDNS.announce();
     MDNS.update();
+    mDNS_timer = time;
+  }
 
+  // Handle client, if available
+  WiFiClient client = server.available();
+  if (!client) {
+    // Log.info("No client found!")
     delay(10);
-
     return;
   }
 

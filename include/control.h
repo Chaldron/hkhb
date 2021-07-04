@@ -19,4 +19,4 @@ void init_control();
 // HomeKit fan functions - identify, active, rotation speed
 int identify(String _);
 int set_active(String);
-int set_rotation_speed(String);
+int set_speed(String);
